@@ -1,6 +1,6 @@
-﻿namespace adfly_se_cheat
+﻿namespace AdflySe
 {
-    partial class Form1
+    partial class ProgramForm
     {
         /// <summary>
         ///  Required designer variable.
