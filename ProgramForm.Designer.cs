@@ -19,22 +19,13 @@
             }
             base.Dispose(disposing);
         }
-
-        #region Windows Form Designer generated code
-
-        /// <summary>
-        ///  Required method for Designer support - do not modify
-        ///  the contents of this method with the code editor.
-        /// </summary>
-        private void InitializeComponent()
-        {
-            this.components = new System.ComponentModel.Container();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Text = "Form1";
-        }
-
-        #endregion
+        private System.Windows.Forms.TextBox inputServerAddress;
+        private System.Windows.Forms.Button btnServerConnect;
+        private System.Windows.Forms.Button btnStop;
+        private System.Windows.Forms.Button btnServerDisconnect;
+        private System.Windows.Forms.Button btnStart;
+        private System.Windows.Forms.TextBox inputAdflyAddress;
+        private System.Windows.Forms.PictureBox logoPic;
     }
 }
 
