@@ -1,6 +1,8 @@
 ﻿using SeproxyTools;
+using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace AdflySe
@@ -13,27 +15,7 @@ namespace AdflySe
         public ProgramForm()
         {
             InitializeComponent();
-            
-            
-
-            if (seproxy.SetServerAddress("http://322.188.53.22:8080"))
-            {
-                seproxy.Connect();
-                seproxy.GetNewProxy(() => {
-                    Debug.WriteLine("Proxy changed");
-                });
-            }
-
-            
-
         }
-
-        public bool NewProxyHandler (string response)
-        {
-            return false;
-        }
-
-
 
         private void InitializeComponent()
         {
@@ -77,7 +59,7 @@ namespace AdflySe
             this.btnServerConnect.TabStop = false;
             this.btnServerConnect.Text = "Connect";
             this.btnServerConnect.UseVisualStyleBackColor = false;
-            this.btnServerConnect.Click += new System.EventHandler(this.connectServerBtnClickHandler);
+            this.btnServerConnect.Click += new System.EventHandler(this.ConnectServerBtnClickHandler);
             // 
             // btnStop
             // 
@@ -94,7 +76,7 @@ namespace AdflySe
             this.btnStop.TabStop = false;
             this.btnStop.Text = "Stop";
             this.btnStop.UseVisualStyleBackColor = false;
-            this.btnStop.Click += new System.EventHandler(this.btnStopClickHandler);
+            this.btnStop.Click += new System.EventHandler(this.BtnStopClickHandler);
             // 
             // btnServerDisconnect
             // 
@@ -112,7 +94,7 @@ namespace AdflySe
             this.btnServerDisconnect.Text = "Disconnect";
             this.btnServerDisconnect.UseVisualStyleBackColor = false;
             this.btnServerDisconnect.UseWaitCursor = true;
-            this.btnServerDisconnect.Click += new System.EventHandler(this.disconnectServerBtnClickHandler);
+            this.btnServerDisconnect.Click += new System.EventHandler(this.DisconnectServerBtnClickHandler);
             // 
             // btnStart
             // 
@@ -128,7 +110,7 @@ namespace AdflySe
             this.btnStart.TabStop = false;
             this.btnStart.Text = "Start";
             this.btnStart.UseVisualStyleBackColor = false;
-            this.btnStart.Click += new System.EventHandler(this.btnStartClickHandler);
+            this.btnStart.Click += new System.EventHandler(this.BtnStartClickHandler);
             // 
             // inputAdflyAddress
             // 
@@ -157,14 +139,14 @@ namespace AdflySe
             // 
             // textStatusServer
             // 
-            this.textStatusServer.AutoSize = true;
             this.textStatusServer.Font = new System.Drawing.Font("Calibri", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.textStatusServer.ForeColor = System.Drawing.SystemColors.ControlLightLight;
-            this.textStatusServer.Location = new System.Drawing.Point(286, 210);
+            this.textStatusServer.Location = new System.Drawing.Point(0, 212);
             this.textStatusServer.Name = "textStatusServer";
-            this.textStatusServer.Size = new System.Drawing.Size(184, 18);
+            this.textStatusServer.Size = new System.Drawing.Size(786, 18);
             this.textStatusServer.TabIndex = 7;
             this.textStatusServer.Text = "Server status: not connected";
+            this.textStatusServer.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // ProgramForm
             // 
@@ -188,75 +170,84 @@ namespace AdflySe
         }
 
 
-        private void connectServerBtnClickHandler(object sender, System.EventArgs e)
+        private void ConnectServerBtnClickHandler(object sender, System.EventArgs e)
         {
             string seAdressInInput = inputServerAddress.Text;
 
-            if (seAdressInInput != "" && serverConnect == false)
+            if (serverConnect == false && seAdressInInput != "")
             {
-                serverConnect = true;
-                disableButton(btnServerConnect);
-                enableButton(btnServerDisconnect);
-                setTextStatusServer("connected");
-                Debug.WriteLine(seAdressInInput);
-            }
+                if (seproxy.SetServerAddress(seAdressInInput))
+                {
+                    seproxy.Connect();
+                    serverConnect = true;
+                    DisableButton(btnServerConnect);
+                    EnableButton(btnServerDisconnect);
 
+                    SetTextStatusServer("connected", Regex.Replace(seAdressInInput, "http://", String.Empty));
+                }
+                else
+                {
+                    ShowError("Unable to connect to server");
+                }
+            } 
         }
-        private void disconnectServerBtnClickHandler(object sender, System.EventArgs e)
+
+        private void DisconnectServerBtnClickHandler(object sender, System.EventArgs e)
         {
             if (serverConnect == true)
             {
-                setTextStatusServer("disconected");
+                seproxy.Disconnect();
+                SetTextStatusServer("disconected");
                 serverConnect = false;
-                disableButton(btnServerDisconnect);
-                enableButton(btnServerConnect);
+                DisableButton(btnServerDisconnect);
+                EnableButton(btnServerConnect);
 
                 adflyConnect = false;
-                disableButton(btnStop);
-                enableButton(btnStart);
+                DisableButton(btnStop);
+                EnableButton(btnStart);
             }
         }
-        private void btnStartClickHandler(object sender, System.EventArgs e)
+        private void BtnStartClickHandler(object sender, System.EventArgs e)
         {
             string adflyAddress = inputAdflyAddress.Text;
 
-            if (adflyAddress != "" && serverConnect == true && adflyConnect == false)
+            if (IsURL(adflyAddress) && serverConnect == true && adflyConnect == false)
             {
                 adflyConnect = true;
-                disableButton(btnStart);
-                enableButton(btnStop);
+                DisableButton(btnStart);
+                EnableButton(btnStop);
             }
         }
 
-        private void btnStopClickHandler(object sender, System.EventArgs e)
+        private void BtnStopClickHandler(object sender, System.EventArgs e)
         {
 
             if (serverConnect == true && adflyConnect == true)
             {
                 adflyConnect = false;
-                disableButton(btnStop);
-                enableButton(btnStart);
+                DisableButton(btnStop);
+                EnableButton(btnStart);
             }
         }
-        public void disableButton (Button button)
+        private void DisableButton (Button button)
         {
             button.Enabled = false;
             button.BackColor = Color.FromArgb(90, 90, 90);
         }
 
-        public void enableButton(Button button)
+        private void EnableButton(Button button)
         {
             button.Enabled = true;
             button.BackColor = Color.FromArgb(20, 109, 224);
             button.ForeColor = Color.FromArgb(255, 255, 255);
         }
 
-        public void setTextStatusServer (string status)
+        private void SetTextStatusServer (string status, string serverAdress = "")
         {
             switch (status)
             {
                 case "connected":
-                    textStatusServer.Text = "Server status: connected";
+                    textStatusServer.Text = "Server status: connected to " + serverAdress;
                     textStatusServer.ForeColor = Color.FromArgb(255, 204, 7);
                     break;
                 case "disconected":
@@ -275,6 +266,18 @@ namespace AdflySe
                     break;
             }
 
+        }
+
+        private bool IsURL (string url)
+        {
+            string pattern = @"^(http|https|ftp|)\://|[a-zA-Z0-9\-\.]+\.[a-zA-Z](:[a-zA-Z0-9]*)?/?([a-zA-Z0-9\-\._\?\,\'/\\\+&amp;%\$#\=~])*[^\.\,\)\(\s]$";
+            Regex reg = new Regex(pattern, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            return reg.IsMatch(url);
+        }
+
+        private void ShowError (string text)
+        {
+            MessageBox.Show(text, "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
         }
     }
 }

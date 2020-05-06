@@ -14,14 +14,7 @@ namespace SeproxyTools
 		
 		public void Connect()
 		{
-			if (serverAdress != "")
-			{
-				connected = true;
-			} else
-			{
-				throw new Exception("Server address not found");
-			}
-
+			connected = true;
 		}
 
 		public bool SetServerAddress(string url)
@@ -34,7 +27,6 @@ namespace SeproxyTools
 			else
 			{
 				return false;
-
 			}
 		}
 
@@ -57,7 +49,7 @@ namespace SeproxyTools
 		}
 
 
-		private bool IsServerRunning(string url)
+		public bool IsServerRunning(string url)
 		{
 			string result = Get(url + "/test");
 
