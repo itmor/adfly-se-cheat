@@ -26,6 +26,7 @@
         private System.Windows.Forms.Button btnStart;
         private System.Windows.Forms.TextBox inputAdflyAddress;
         private System.Windows.Forms.PictureBox logoPic;
+        private System.Windows.Forms.Label textStatusServer;
     }
 }
 
