@@ -9,6 +9,7 @@ namespace AdflySe
     {
         Seproxy seproxy = new Seproxy();
         bool serverConnect = false;
+        bool adflyConnect = false;
         public ProgramForm()
         {
             InitializeComponent();
@@ -76,15 +77,16 @@ namespace AdflySe
             this.btnServerConnect.TabStop = false;
             this.btnServerConnect.Text = "Connect";
             this.btnServerConnect.UseVisualStyleBackColor = false;
-            this.btnServerConnect.Click += new System.EventHandler(this.connectBtnClickHandler);
+            this.btnServerConnect.Click += new System.EventHandler(this.connectServerBtnClickHandler);
             // 
             // btnStop
             // 
-            this.btnStop.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(109)))), ((int)(((byte)(224)))));
+            this.btnStop.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(90)))), ((int)(((byte)(90)))), ((int)(((byte)(90)))));
+            this.btnStop.Enabled = false;
             this.btnStop.FlatAppearance.BorderSize = 0;
             this.btnStop.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnStop.Font = new System.Drawing.Font("Malgun Gothic", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnStop.ForeColor = System.Drawing.SystemColors.ControlLightLight;
+            this.btnStop.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(29)))), ((int)(((byte)(29)))), ((int)(((byte)(29)))));
             this.btnStop.Location = new System.Drawing.Point(421, 419);
             this.btnStop.Name = "btnStop";
             this.btnStop.Size = new System.Drawing.Size(148, 31);
@@ -92,14 +94,16 @@ namespace AdflySe
             this.btnStop.TabStop = false;
             this.btnStop.Text = "Stop";
             this.btnStop.UseVisualStyleBackColor = false;
+            this.btnStop.Click += new System.EventHandler(this.btnStopClickHandler);
             // 
             // btnServerDisconnect
             // 
-            this.btnServerDisconnect.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(28)))), ((int)(((byte)(109)))), ((int)(((byte)(224)))));
+            this.btnServerDisconnect.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(90)))), ((int)(((byte)(90)))), ((int)(((byte)(90)))));
+            this.btnServerDisconnect.Enabled = false;
             this.btnServerDisconnect.FlatAppearance.BorderSize = 0;
             this.btnServerDisconnect.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnServerDisconnect.Font = new System.Drawing.Font("Malgun Gothic", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.btnServerDisconnect.ForeColor = System.Drawing.SystemColors.ControlLight;
+            this.btnServerDisconnect.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(29)))), ((int)(((byte)(29)))), ((int)(((byte)(29)))));
             this.btnServerDisconnect.Location = new System.Drawing.Point(421, 300);
             this.btnServerDisconnect.Name = "btnServerDisconnect";
             this.btnServerDisconnect.Size = new System.Drawing.Size(148, 33);
@@ -107,6 +111,8 @@ namespace AdflySe
             this.btnServerDisconnect.TabStop = false;
             this.btnServerDisconnect.Text = "Disconnect";
             this.btnServerDisconnect.UseVisualStyleBackColor = false;
+            this.btnServerDisconnect.UseWaitCursor = true;
+            this.btnServerDisconnect.Click += new System.EventHandler(this.disconnectServerBtnClickHandler);
             // 
             // btnStart
             // 
@@ -122,6 +128,7 @@ namespace AdflySe
             this.btnStart.TabStop = false;
             this.btnStart.Text = "Start";
             this.btnStart.UseVisualStyleBackColor = false;
+            this.btnStart.Click += new System.EventHandler(this.btnStartClickHandler);
             // 
             // inputAdflyAddress
             // 
@@ -152,7 +159,7 @@ namespace AdflySe
             // 
             this.textStatusServer.AutoSize = true;
             this.textStatusServer.Font = new System.Drawing.Font("Calibri", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.textStatusServer.ForeColor = System.Drawing.SystemColors.ControlLight;
+            this.textStatusServer.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.textStatusServer.Location = new System.Drawing.Point(286, 210);
             this.textStatusServer.Name = "textStatusServer";
             this.textStatusServer.Size = new System.Drawing.Size(184, 18);
@@ -174,19 +181,14 @@ namespace AdflySe
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.Name = "ProgramForm";
-            this.Load += new System.EventHandler(this.ProgramForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.logoPic)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
-        private void ProgramForm_Load(object sender, System.EventArgs e)
-        {
 
-        }
-
-        private void connectBtnClickHandler(object sender, System.EventArgs e)
+        private void connectServerBtnClickHandler(object sender, System.EventArgs e)
         {
             string seAdressInInput = inputServerAddress.Text;
 
@@ -194,10 +196,47 @@ namespace AdflySe
             {
                 serverConnect = true;
                 disableButton(btnServerConnect);
+                enableButton(btnServerDisconnect);
                 setTextStatusServer("connected");
                 Debug.WriteLine(seAdressInInput);
             }
 
+        }
+        private void disconnectServerBtnClickHandler(object sender, System.EventArgs e)
+        {
+            if (serverConnect == true)
+            {
+                setTextStatusServer("disconected");
+                serverConnect = false;
+                disableButton(btnServerDisconnect);
+                enableButton(btnServerConnect);
+
+                adflyConnect = false;
+                disableButton(btnStop);
+                enableButton(btnStart);
+            }
+        }
+        private void btnStartClickHandler(object sender, System.EventArgs e)
+        {
+            string adflyAddress = inputAdflyAddress.Text;
+
+            if (adflyAddress != "" && serverConnect == true && adflyConnect == false)
+            {
+                adflyConnect = true;
+                disableButton(btnStart);
+                enableButton(btnStop);
+            }
+        }
+
+        private void btnStopClickHandler(object sender, System.EventArgs e)
+        {
+
+            if (serverConnect == true && adflyConnect == true)
+            {
+                adflyConnect = false;
+                disableButton(btnStop);
+                enableButton(btnStart);
+            }
         }
         public void disableButton (Button button)
         {
@@ -222,18 +261,20 @@ namespace AdflySe
                     break;
                 case "disconected":
                     textStatusServer.Text = "Server status: disconected";
+                    textStatusServer.ForeColor = Color.FromArgb(255, 255, 255);
                     break;
                 case "error":
                     textStatusServer.Text = "Server status: error";
+                    textStatusServer.ForeColor = Color.FromArgb(255, 89, 89);
                     break;
                 case "not responsing":
                     textStatusServer.Text = "Server status: not responsing";
+                    textStatusServer.ForeColor = Color.FromArgb(127, 0, 0);
                     break;
                 default:
                     break;
             }
 
         }
-
     }
 }
