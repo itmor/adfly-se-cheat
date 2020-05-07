@@ -5,7 +5,17 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>adfly-se</RootNamespace>
     <UseWindowsForms>true</UseWindowsForms>
+    <Win32Resource></Win32Resource>
+    <ApplicationIcon>Безымянный.ico</ApplicationIcon>
+    <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NUnit" Version="3.12.0" />
+    <PackageReference Include="Selenium.Chrome.WebDriver" Version="81.0.0" />
+    <PackageReference Include="Selenium.Support" Version="3.141.0" />
+    <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
+  </ItemGroup>
 
   <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">

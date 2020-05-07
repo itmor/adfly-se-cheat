@@ -4,11 +4,20 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Remote;
+using OpenQA.Selenium.Firefox;
+using OpenQA.Selenium.Chrome;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using OpenQA.Selenium.Support.UI;
 
 namespace AdflySe
 {
     public partial class ProgramForm : Form
     {
+        IWebDriver Driver;
         Seproxy seproxy = new Seproxy();
         bool serverConnect = false;
         bool adflyConnect = false;
@@ -207,12 +216,19 @@ namespace AdflySe
                 EnableButton(btnStart);
             }
         }
+
+        [Obsolete]
         private void BtnStartClickHandler(object sender, System.EventArgs e)
         {
             string adflyAddress = inputAdflyAddress.Text;
 
             if (IsURL(adflyAddress) && serverConnect == true && adflyConnect == false)
             {
+                Task task = new Task(() => {
+                    NewAdflyCheat(adflyAddress);
+                });
+
+                task.Start();
                 adflyConnect = true;
                 DisableButton(btnStart);
                 EnableButton(btnStop);
@@ -224,6 +240,7 @@ namespace AdflySe
 
             if (serverConnect == true && adflyConnect == true)
             {
+                Driver.Quit();
                 adflyConnect = false;
                 DisableButton(btnStop);
                 EnableButton(btnStart);
@@ -240,6 +257,42 @@ namespace AdflySe
             button.Enabled = true;
             button.BackColor = Color.FromArgb(20, 109, 224);
             button.ForeColor = Color.FromArgb(255, 255, 255);
+        }
+
+       private void NewAdflyCheat (string adflyAddress)
+        {
+            Driver = getNewWebDriver();
+
+            Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(20);
+
+            try
+            {
+                Driver.Navigate().GoToUrl(adflyAddress);
+                
+                
+                WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(20));
+                wait.Until(ExpectedConditions.ElementToBeClickable(By.ClassName("mwButton")));
+
+                Wait(5000, () => {
+                    string url = Driver.FindElement(By.ClassName("mwButton")).GetAttribute("href");
+                    Driver.Navigate().GoToUrl(url);
+
+                    Wait(5000, () => {
+                        Driver.Quit();
+                    });
+                });
+
+                seproxy.GetNewProxy(() => {
+                    NewAdflyCheat(adflyAddress);
+                });
+
+            }
+            catch (Exception)
+            {
+                Driver.Quit();
+                NewAdflyCheat(adflyAddress);
+
+            }
         }
 
         private void SetTextStatusServer (string status, string serverAdress = "")
@@ -278,6 +331,43 @@ namespace AdflySe
         private void ShowError (string text)
         {
             MessageBox.Show(text, "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error);
+        }
+
+        private IWebDriver getNewWebDriver ()
+        {
+            string[] userUgent = File.ReadLines("user-agents.txt").ToArray();
+            int randomUserUgent = RandomNumber(1, userUgent.Length);
+            ChromeOptions options = new ChromeOptions();
+            options.AddUserProfilePreference("disable-popup-blocking", "true");
+            options.AddUserProfilePreference("download.prompt_for_download", false);
+            options.AddArguments("disable-infobars");
+            options.AddArgument("--user-agent=" + userUgent[randomUserUgent]);
+            Driver = new ChromeDriver(options);
+            return Driver;
+        }
+        private void Wait(int milliseconds, Action callBack)
+        {
+            Timer timer = new Timer();
+            if (milliseconds == 0 || milliseconds < 0) return;
+            timer.Interval = milliseconds;
+            timer.Enabled = true;
+            timer.Start();
+            timer.Tick += (s, e) =>
+            {
+                timer.Enabled = false;
+                timer.Stop();
+                callBack();
+            };
+            while (timer.Enabled)
+            {
+                Application.DoEvents();
+            }
+        }
+
+        private int RandomNumber (int min, int max)
+        {
+            Random random = new Random();
+            return random.Next(min, max);
         }
     }
 }

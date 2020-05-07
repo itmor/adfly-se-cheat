@@ -97,8 +97,8 @@ namespace SeproxyTools
 		
 				if (status == "not work" || connected == false)
 				{
-					callback();
 					workerTimer.Stop();
+					callback();
 				}
 			};
 
