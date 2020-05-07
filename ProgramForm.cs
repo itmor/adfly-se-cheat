@@ -170,8 +170,10 @@ namespace AdflySe
             this.Controls.Add(this.btnServerConnect);
             this.Controls.Add(this.inputServerAddress);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "ProgramForm";
+            this.Load += new System.EventHandler(this.ProgramForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.logoPic)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -224,12 +226,12 @@ namespace AdflySe
 
             if (IsURL(adflyAddress) && serverConnect == true && adflyConnect == false)
             {
+                adflyConnect = true;
                 Task task = new Task(() => {
                     NewAdflyCheat(adflyAddress);
                 });
 
                 task.Start();
-                adflyConnect = true;
                 DisableButton(btnStart);
                 EnableButton(btnStop);
             }
@@ -240,6 +242,7 @@ namespace AdflySe
 
             if (serverConnect == true && adflyConnect == true)
             {
+
                 Driver.Quit();
                 adflyConnect = false;
                 DisableButton(btnStop);
@@ -261,37 +264,39 @@ namespace AdflySe
 
        private void NewAdflyCheat (string adflyAddress)
         {
-            Driver = getNewWebDriver();
-
-            Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(20);
-
-            try
+            if (adflyConnect)
             {
-                Driver.Navigate().GoToUrl(adflyAddress);
-                
-                
-                WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(20));
-                wait.Until(ExpectedConditions.ElementToBeClickable(By.ClassName("mwButton")));
+                Driver = getNewWebDriver();
 
-                Wait(5000, () => {
-                    string url = Driver.FindElement(By.ClassName("mwButton")).GetAttribute("href");
-                    Driver.Navigate().GoToUrl(url);
+                Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(20);
 
-                    Wait(5000, () => {
-                        Driver.Quit();
+                try
+                {
+                    Driver.Navigate().GoToUrl(adflyAddress);
+
+                    WebDriverWait wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(20));
+                    wait.Until(ExpectedConditions.ElementToBeClickable(By.ClassName("mwButton")));
+
+                    Wait(3000, () => {
+                        string url = Driver.FindElement(By.ClassName("mwButton")).GetAttribute("href");
+                        Driver.Navigate().GoToUrl(url);
+
+                        Wait(3000, () => {
+                            Driver.Quit();
+                        });
                     });
-                });
 
-                seproxy.GetNewProxy(() => {
+                    seproxy.GetNewProxy(() => {
+                        NewAdflyCheat(adflyAddress);
+                    });
+
+                }
+                catch (Exception)
+                {
+                    Driver.Quit();
                     NewAdflyCheat(adflyAddress);
-                });
 
-            }
-            catch (Exception)
-            {
-                Driver.Quit();
-                NewAdflyCheat(adflyAddress);
-
+                }
             }
         }
 
@@ -368,6 +373,11 @@ namespace AdflySe
         {
             Random random = new Random();
             return random.Next(min, max);
+        }
+
+        private void ProgramForm_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
